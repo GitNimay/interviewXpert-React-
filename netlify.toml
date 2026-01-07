@@ -1,14 +1,7 @@
 [build]
-  # Standard build command.
-  # If your build fails due to warnings, change this to: "CI=false npm run build"
-  command = "npm run build"
-
-  # The directory containing the built assets.
-  # Common values: "build" (Create React App), "dist" (Vite/Vue).
-  # Update this if your project outputs to a different folder.
-  publish = "dist"
-
-# Redirect rule for Single Page Applications (SPA) to prevent 404s on refresh
+   command = "npm run build"
+   publish = "dist"
+ 
 [[redirects]]
   from = "/*"
   to = "/index.html"

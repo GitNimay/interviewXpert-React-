@@ -533,37 +533,51 @@ const HowItWorks: React.FC = () => (
 const LiveDemo: React.FC = () => {
   const [isSimulating, setIsSimulating] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startSimulation = async () => {
-    setIsSimulating(true);
-    setTimeout(async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    try {
+      // Request permission immediately on user click to satisfy browser security policies
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      streamRef.current = stream;
+      
+      setIsSimulating(true);
+      
+      // Wait for state update to render video element
+      setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
-      } catch (err) {
-        console.error("Camera error", err);
-        alert("Could not access camera. Please allow permissions to try the simulation.");
-        setIsSimulating(false);
+      }, 100);
+    } catch (err: any) {
+      console.error("Camera error", err);
+      let msg = "Could not access camera. Please allow permissions to try the simulation.";
+      
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        msg = "Camera permission denied. Please allow access in your browser settings (usually icon in address bar).";
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        msg = "No camera found on this device.";
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        msg = "Camera is currently in use by another application.";
       }
-    }, 100);
+
+      alert(msg);
+      setIsSimulating(false);
+    }
   };
 
   const stopSimulation = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      videoRef.current.srcObject = null;
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
     setIsSimulating(false);
   };
 
   useEffect(() => {
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
   }, []);

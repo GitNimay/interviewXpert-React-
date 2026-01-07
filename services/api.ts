@@ -12,7 +12,7 @@ const ASSEMBLYAI_TRANSCRIPT_ENDPOINT = 'https://api.assemblyai.com/v2/transcript
 // --- Gemini API ---
 // Note: Client-side API usage is generally insecure for production but maintained here as per legacy code structure.
 // Using process.env.API_KEY as per coding guidelines
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
 export const generateInterviewQuestions = async (jobTitle: string, jobDescription: string, candidateExp: string, base64Resume: string, mimeType: string) => {
   const prompt = `You are an AI interviewer. Your task is to generate 5 diverse interview questions for a candidate applying for the "${jobTitle}" role.
